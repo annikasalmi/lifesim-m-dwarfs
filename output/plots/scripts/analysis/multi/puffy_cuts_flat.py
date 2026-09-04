@@ -19,7 +19,7 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 import sys
 from pathlib import Path
 
-from tools.paths import LIFESIM_OUTER_DIR, EXOPLANET_CSV_DIR
+from tools.paths import LIFESIM_OUTER_DIR, PSCOMPPARS_CSV
 ROOT = Path(LIFESIM_OUTER_DIR)
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -43,7 +43,7 @@ from run.ppop.flat_detect import run_kepler, run_rv_best
 
 SILICATE_CURVE = Path(SILICON_CURVE)
 PPOP_CATALOG = ROOT / "run" / "kepler" / "data" / "Gaia" / "kepler_catalog_0.csv"
-NASA_FILE = Path(EXOPLANET_CSV_DIR) / "exoplanets_2026.csv"
+NASA_FILE = Path(PSCOMPPARS_CSV)
 OUT_DIR = os.path.join(ROOT, "output/plots", "puffy_cuts_flat")
 
 N_SAMPLE = 20000

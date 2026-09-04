@@ -53,7 +53,7 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 import sys
 from pathlib import Path
 
-from tools.paths import LIFESIM_OUTER_DIR, SILICON_CURVE, EXOPLANET_CSV_DIR
+from tools.paths import LIFESIM_OUTER_DIR, SILICON_CURVE, PSCOMPPARS_CSV
 ROOT = Path(LIFESIM_OUTER_DIR)
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -79,7 +79,7 @@ from run.flat_universe.uniform_generator import generate_flat_catalog
 from run.ppop.flat_detect import run_kepler, run_rv_best
 
 SILICATE_CURVE = Path(SILICON_CURVE)
-NASA_FILE = Path(EXOPLANET_CSV_DIR) / "exoplanets_2026.csv"
+NASA_FILE = Path(PSCOMPPARS_CSV)
 OUT_DIR = os.path.join(ROOT, "my_outputs", "likelihood_ratio_catalog")
 
 FLAT_N_POOL = 1_000_000
