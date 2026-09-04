@@ -17,7 +17,7 @@ import pandas as pd
 from run.ppop.ppop_generator import PPop
 
 from telescopes.kepler.detection_model import KeplerData
-from tools.paths import KEPLER_DATA_DIR
+from tools.paths import KEPLER_DATA_DIR, PSCOMPPARS_CSV
 
 from PPop.StarCatalogs import (
     CrossfieldBrightSample,
@@ -28,7 +28,7 @@ from PPop.StarCatalogs import (
 )
 
 NASA_DATA_DIR = ROOT / "run" / "kepler" / "data" / "NASA"
-NASA_INPUT_CSV = NASA_DATA_DIR / "NASA_PSCompPars_transiting_confirmed_RM_insolation.csv"
+NASA_INPUT_CSV = Path(PSCOMPPARS_CSV)
 NASA_OUTPUT_CSV = NASA_DATA_DIR / "kepler_catalog_nasa_pscomppars.csv"
 
 # NASA PSCompPars detection parameters
@@ -130,12 +130,27 @@ def run_nasa_pscomppars(input_csv=NASA_INPUT_CSV, output_csv=NASA_OUTPUT_CSV):
     if not input_csv.exists():
         raise FileNotFoundError(
             f"Could not find NASA input CSV:\n{input_csv}\n\n"
-            "Put NASA_PSCompPars_transiting_confirmed_RM_insolation.csv in run/kepler/data/NASA/."
+            "Download it with output/plots/mission_calibration or the archive TAP service."
         )
 
     print(f"Loading NASA PSCompPars: {input_csv}")
-    df = pd.read_csv(input_csv)
+    df = pd.read_csv(input_csv, comment="#", low_memory=False)
     print(f"Raw NASA rows: {len(df):,}")
+
+    # The pipeline wants transiting, confirmed planets with a measured (not
+    # relation-derived) mass and a known insolation -- the cuts the old
+    # pre-filtered export carried in its filename.
+    prov = df.get("pl_bmassprov", pd.Series("", index=df.index)).astype(str)
+    keep = (
+        (df.get("tran_flag", 1) == 1)
+        & df["pl_insol"].notna()
+        & prov.str.contains("Mass", case=False, na=False)
+        & ~prov.str.contains("Calc", case=False, na=False)
+    )
+    if "soltype" in df.columns:
+        keep &= df["soltype"].astype(str).str.contains("Conf", case=False, na=False)
+    df = df[keep].copy()
+    print(f"After transiting/confirmed/measured-mass/insolation cuts: {len(df):,}")
 
     model = KeplerData(
         df,
